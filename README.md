@@ -284,7 +284,7 @@ Note that you must notate the desired target with the prefix `origin-`.
 For example, if you want to get the original results used for Figure 6,
 run
 ```
-$ python3 ./scripts/reproduce.py parse origin-figure6 86400
+$ python3 ./scripts/reproduce.py parse origin-fig6 86400
 ```
 
 The CSV file will be stored in the `output/origin` directory.

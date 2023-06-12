@@ -114,18 +114,18 @@ def main():
                 if target != "fig9-scaled":
                     shutil.copytree(os.path.join(tbl2_scaled_dir, "DAFL"), os.path.join(outdir, "DAFL"))
                     tools.remove("DAFL")
-    elif target == "table2":
+    elif target == "tbl2":
         benchmark = "all"
         target_list = [x for (x,y,z,w) in FUZZ_TARGETS]
         tools = ["AFL", "AFLGo", "WindRanger", "DAFL", "Beacon", "DAFL_noasan"]
-    elif target in ["figure6", "figure7", "figure8"]:
+    elif target in ["fig7", "fig8", "figure9"]:
         benchmark = "supple"
         target_list = [x for (x,y,z,w) in SUPPLE_FUZZ_TARGETS]
-        if target == "figure6":
+        if target == "fig7":
             tools = ["AFL", "DAFL_naive", "DAFL"]
-        elif target == "figure7":
+        elif target == "fig8":
             tools = ["AFL", "DAFL_semRel", "DAFL_selIns", "DAFL"]
-        elif target == "figure8":
+        elif target == "fig9":
             tools = ["AFL", "DAFL_energy", "DAFL_seedpool", "DAFL_semRel"]
     elif target == "test":
         target = "lrzip-ed51e14-2018-11496"
