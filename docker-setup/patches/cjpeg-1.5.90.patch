@@ -1,0 +1,201 @@
+diff -ruN cjpeg-1.5.90/jmemmgr.i ../cjpeg-modified/cjpeg-1.5.90/jmemmgr.i
+--- cjpeg-1.5.90/jmemmgr.i	2022-07-20 10:11:03.429052171 +0900
++++ ../cjpeg-modified/cjpeg-1.5.90/jmemmgr.i	2022-07-20 12:49:07.451581969 +0900
+@@ -3357,7 +3357,7 @@
+ extern void jinit_2pass_quantizer(j_decompress_ptr cinfo);
+ extern void jinit_merged_upsampler(j_decompress_ptr cinfo);
+ 
+-extern void jinit_memory_mgr(j_common_ptr cinfo);
++extern void jinit_memory_mgr(j_compress_ptr cinfo);
+ 
+ 
+ extern long jdiv_round_up(long a, long b);
+@@ -4562,7 +4562,7 @@
+ 
+ 
+ void
+-jinit_memory_mgr(j_common_ptr cinfo)
++jinit_memory_mgr(j_compress_ptr cinfo)
+ {
+   my_mem_ptr mem;
+   long max_to_use;
+@@ -4586,7 +4586,7 @@
+   max_to_use = jpeg_mem_init(cinfo);
+ 
+ 
+-  mem = (my_mem_ptr)jpeg_get_small(cinfo, sizeof(my_memory_mgr));
++  mem = (my_mem_ptr)malloc(sizeof(my_memory_mgr));
+ 
+   if (mem == ((void*)0)) {
+     jpeg_mem_term(cinfo);
+diff -ruN cjpeg-1.5.90/rdbmp.i ../cjpeg-modified/cjpeg-1.5.90/rdbmp.i
+--- cjpeg-1.5.90/rdbmp.i	2022-07-20 10:11:03.429052171 +0900
++++ ../cjpeg-modified/cjpeg-1.5.90/rdbmp.i	2022-07-20 12:54:15.075401495 +0900
+@@ -3920,13 +3920,13 @@
+        source->source_row, (JDIMENSION)1, 0);
+     inptr = image_ptr[0];
+   } else {
+-    if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->row_width), (source->pub.input_file))) == ((size_t)(source->row_width))))
++    if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->row_width), (sinfo->input_file))) == ((size_t)(source->row_width))))
+       ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+     inptr = source->iobuffer;
+   }
+ 
+ 
+-  outptr = source->pub.buffer[0];
++  outptr = sinfo->buffer[0];
+   if (cinfo->in_color_space == JCS_GRAYSCALE) {
+     for (col = cinfo->image_width; col > 0; col--) {
+       t = ((int)(*inptr++));
+@@ -3987,7 +3987,7 @@
+        source->source_row, (JDIMENSION)1, 0);
+     inptr = image_ptr[0];
+   } else {
+-    if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->row_width), (source->pub.input_file))) == ((size_t)(source->row_width))))
++    if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->row_width), (sinfo->input_file))) == ((size_t)(source->row_width))))
+       ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+     inptr = source->iobuffer;
+   }
+@@ -3995,7 +3995,7 @@
+ 
+ 
+ 
+-  outptr = source->pub.buffer[0];
++  outptr = sinfo->buffer[0];
+   if (cinfo->in_color_space == JCS_EXT_BGR) {
+     memcpy((void *)(outptr), (const void *)(inptr), (size_t)(source->row_width));
+   } else if (cinfo->in_color_space == JCS_CMYK) {
+@@ -4051,7 +4051,7 @@
+        source->source_row, (JDIMENSION)1, 0);
+     inptr = image_ptr[0];
+   } else {
+-    if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->row_width), (source->pub.input_file))) == ((size_t)(source->row_width))))
++    if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->row_width), (sinfo->input_file))) == ((size_t)(source->row_width))))
+       ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+     inptr = source->iobuffer;
+   }
+@@ -4059,7 +4059,7 @@
+ 
+ 
+ 
+-  outptr = source->pub.buffer[0];
++  outptr = sinfo->buffer[0];
+   if (cinfo->in_color_space == JCS_EXT_BGRX ||
+       cinfo->in_color_space == JCS_EXT_BGRA) {
+     memcpy((void *)(outptr), (const void *)(inptr), (size_t)(source->row_width));
+@@ -4104,7 +4104,7 @@
+ preload_image(j_compress_ptr cinfo, cjpeg_source_ptr sinfo)
+ {
+   bmp_source_ptr source = (bmp_source_ptr)sinfo;
+-  register FILE *infile = source->pub.input_file;
++  register FILE *infile = sinfo->input_file;
+   register JSAMPROW out_ptr;
+   JSAMPARRAY image_ptr;
+   JDIMENSION row;
+@@ -4133,13 +4133,13 @@
+ 
+   switch (source->bits_per_pixel) {
+   case 8:
+-    source->pub.get_pixel_rows = get_8bit_row;
++    sinfo->get_pixel_rows = get_8bit_row;
+     break;
+   case 24:
+-    source->pub.get_pixel_rows = get_24bit_row;
++    sinfo->get_pixel_rows = get_24bit_row;
+     break;
+   case 32:
+-    source->pub.get_pixel_rows = get_32bit_row;
++    sinfo->get_pixel_rows = get_32bit_row;
+     break;
+   default:
+     ((cinfo)->err->msg_code = (JERR_BMP_BADDEPTH), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+@@ -4147,7 +4147,7 @@
+   source->source_row = cinfo->image_height;
+ 
+ 
+-  return (*source->pub.get_pixel_rows) (cinfo, sinfo);
++  return (*sinfo->get_pixel_rows) (cinfo, sinfo);
+ }
+ 
+ 
+@@ -4175,7 +4175,7 @@
+   JDIMENSION row_width = 0;
+ 
+ 
+-  if (!(((size_t)fread((void *)(bmpfileheader), (size_t)1, (size_t)(14), (source->pub.input_file))) == ((size_t)(14))))
++  if (!(((size_t)fread((void *)(bmpfileheader), (size_t)1, (size_t)(14), (sinfo->input_file))) == ((size_t)(14))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+   if (((unsigned short)((int)(bmpfileheader[0])) + (((unsigned short)((int)(bmpfileheader[0 + 1]))) << 8)) != 0x4D42)
+     ((cinfo)->err->msg_code = (JERR_BMP_NOT), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+@@ -4185,12 +4185,12 @@
+ 
+ 
+ 
+-  if (!(((size_t)fread((void *)(bmpinfoheader), (size_t)1, (size_t)(4), (source->pub.input_file))) == ((size_t)(4))))
++  if (!(((size_t)fread((void *)(bmpinfoheader), (size_t)1, (size_t)(4), (sinfo->input_file))) == ((size_t)(4))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+   headerSize = ((unsigned int)((int)(bmpinfoheader[0])) + (((unsigned int)((int)(bmpinfoheader[0 + 1]))) << 8) + (((unsigned int)((int)(bmpinfoheader[0 + 2]))) << 16) + (((unsigned int)((int)(bmpinfoheader[0 + 3]))) << 24));
+   if (headerSize < 12 || headerSize > 64)
+     ((cinfo)->err->msg_code = (JERR_BMP_BADHEADER), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  if (!(((size_t)fread((void *)(bmpinfoheader + 4), (size_t)1, (size_t)(headerSize - 4), (source->pub.input_file))) == ((size_t)(headerSize - 4))))
++  if (!(((size_t)fread((void *)(bmpinfoheader + 4), (size_t)1, (size_t)(headerSize - 4), (sinfo->input_file))) == ((size_t)(headerSize - 4))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+ 
+   switch (headerSize) {
+@@ -4336,7 +4336,7 @@
+     source->whole_image = (*cinfo->mem->request_virt_sarray)
+       ((j_common_ptr)cinfo, 1, 0,
+        row_width, (JDIMENSION)biHeight, (JDIMENSION)1);
+-    source->pub.get_pixel_rows = preload_image;
++    sinfo->get_pixel_rows = preload_image;
+     if (cinfo->progress != ((void*)0)) {
+       cd_progress_ptr progress = (cd_progress_ptr)cinfo->progress;
+       progress->total_extra_passes++;
+@@ -4346,13 +4346,13 @@
+       (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, 1, row_width);
+     switch (source->bits_per_pixel) {
+     case 8:
+-      source->pub.get_pixel_rows = get_8bit_row;
++      sinfo->get_pixel_rows = get_8bit_row;
+       break;
+     case 24:
+-      source->pub.get_pixel_rows = get_24bit_row;
++      sinfo->get_pixel_rows = get_24bit_row;
+       break;
+     case 32:
+-      source->pub.get_pixel_rows = get_32bit_row;
++      sinfo->get_pixel_rows = get_32bit_row;
+       break;
+     default:
+       ((cinfo)->err->msg_code = (JERR_BMP_BADDEPTH), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+@@ -4360,10 +4360,10 @@
+   }
+ 
+ 
+-  source->pub.buffer = (*cinfo->mem->alloc_sarray)
++  sinfo->buffer = (*cinfo->mem->alloc_sarray)
+     ((j_common_ptr)cinfo, 1,
+      (JDIMENSION)(biWidth * cinfo->input_components), (JDIMENSION)1);
+-  source->pub.buffer_height = 1;
++  sinfo->buffer_height = 1;
+ 
+   cinfo->data_precision = 8;
+   cinfo->image_width = (JDIMENSION)biWidth;
+@@ -4392,9 +4392,7 @@
+   bmp_source_ptr source;
+ 
+ 
+-  source = (bmp_source_ptr)
+-    (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, 1,
+-                                sizeof(bmp_source_struct));
++  source = (bmp_source_ptr) malloc(sizeof(bmp_source_struct)) ;
+   source->cinfo = cinfo;
+ 
+   source->pub.start_input = start_input_bmp;
+@@ -4402,5 +4400,5 @@
+ 
+   source->use_inversion_array = use_inversion_array;
+ 
+-  return (cjpeg_source_ptr)source;
++  return (cjpeg_source_ptr)&source->pub;
+ }

@@ -1,0 +1,348 @@
+diff -ruN cjpeg-2.0.4/jmemmgr.i ../cjpeg-modified/cjpeg-2.0.4/jmemmgr.i
+--- cjpeg-2.0.4/jmemmgr.i	2022-07-20 10:11:03.457051072 +0900
++++ ../cjpeg-modified/cjpeg-2.0.4/jmemmgr.i	2022-07-20 12:35:36.699701430 +0900
+@@ -3357,7 +3357,7 @@
+ extern void jinit_2pass_quantizer(j_decompress_ptr cinfo);
+ extern void jinit_merged_upsampler(j_decompress_ptr cinfo);
+ 
+-extern void jinit_memory_mgr(j_common_ptr cinfo);
++extern void jinit_memory_mgr(j_compress_ptr cinfo);
+ 
+ 
+ extern long jdiv_round_up(long a, long b);
+@@ -4562,7 +4562,7 @@
+ 
+ 
+ void
+-jinit_memory_mgr(j_common_ptr cinfo)
++jinit_memory_mgr(j_compress_ptr cinfo)
+ {
+   my_mem_ptr mem;
+   long max_to_use;
+@@ -4586,7 +4586,7 @@
+   max_to_use = jpeg_mem_init(cinfo);
+ 
+ 
+-  mem = (my_mem_ptr)jpeg_get_small(cinfo, sizeof(my_memory_mgr));
++  mem = (my_mem_ptr)malloc(sizeof(my_memory_mgr));
+ 
+   if (mem == ((void*)0)) {
+     jpeg_mem_term(cinfo);
+diff -ruN cjpeg-2.0.4/rdppm.i ../cjpeg-modified/cjpeg-2.0.4/rdppm.i
+--- cjpeg-2.0.4/rdppm.i	2022-07-20 10:11:03.461050915 +0900
++++ ../cjpeg-modified/cjpeg-2.0.4/rdppm.i	2022-07-20 12:54:57.593718087 +0900
+@@ -3881,13 +3881,13 @@
+ 
+ {
+   ppm_source_ptr source = (ppm_source_ptr)sinfo;
+-  FILE *infile = source->pub.input_file;
++  FILE *infile = sinfo->input_file;
+   register JSAMPROW ptr;
+   register JSAMPLE *rescale = source->rescale;
+   JDIMENSION col;
+   unsigned int maxval = source->maxval;
+ 
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   for (col = cinfo->image_width; col > 0; col--) {
+     *ptr++ = rescale[read_pbm_integer(cinfo, infile, maxval)];
+   }
+@@ -3900,7 +3900,7 @@
+ 
+ {
+   ppm_source_ptr source = (ppm_source_ptr)sinfo;
+-  FILE *infile = source->pub.input_file;
++  FILE *infile = sinfo->input_file;
+   register JSAMPROW ptr;
+   register JSAMPLE *rescale = source->rescale;
+   JDIMENSION col;
+@@ -3911,7 +3911,7 @@
+   register int aindex = alpha_index[cinfo->in_color_space];
+   register int ps = rgb_pixelsize[cinfo->in_color_space];
+ 
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   if (maxval == 255) {
+     if (aindex >= 0)
+       { for (col = cinfo->image_width; col > 0; col--) { ptr[rindex] = ptr[gindex] = ptr[bindex] = read_pbm_integer(cinfo, infile, maxval); ptr[aindex] = 0xFF; ptr += ps; } }
+@@ -3935,13 +3935,13 @@
+ 
+ {
+   ppm_source_ptr source = (ppm_source_ptr)sinfo;
+-  FILE *infile = source->pub.input_file;
++  FILE *infile = sinfo->input_file;
+   register JSAMPROW ptr;
+   register JSAMPLE *rescale = source->rescale;
+   JDIMENSION col;
+   unsigned int maxval = source->maxval;
+ 
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   if (maxval == 255) {
+     for (col = cinfo->image_width; col > 0; col--) {
+       JSAMPLE gray = read_pbm_integer(cinfo, infile, maxval);
+@@ -3963,7 +3963,7 @@
+ 
+ {
+   ppm_source_ptr source = (ppm_source_ptr)sinfo;
+-  FILE *infile = source->pub.input_file;
++  FILE *infile = sinfo->input_file;
+   register JSAMPROW ptr;
+   register JSAMPLE *rescale = source->rescale;
+   JDIMENSION col;
+@@ -3974,7 +3974,7 @@
+   register int aindex = alpha_index[cinfo->in_color_space];
+   register int ps = rgb_pixelsize[cinfo->in_color_space];
+ 
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   if (maxval == 255) {
+     if (aindex >= 0)
+       { for (col = cinfo->image_width; col > 0; col--) { ptr[rindex] = read_pbm_integer(cinfo, infile, maxval); ptr[gindex] = read_pbm_integer(cinfo, infile, maxval); ptr[bindex] = read_pbm_integer(cinfo, infile, maxval); ptr[aindex] = 0xFF; ptr += ps; } }
+@@ -3998,13 +3998,13 @@
+ 
+ {
+   ppm_source_ptr source = (ppm_source_ptr)sinfo;
+-  FILE *infile = source->pub.input_file;
++  FILE *infile = sinfo->input_file;
+   register JSAMPROW ptr;
+   register JSAMPLE *rescale = source->rescale;
+   JDIMENSION col;
+   unsigned int maxval = source->maxval;
+ 
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   if (maxval == 255) {
+     for (col = cinfo->image_width; col > 0; col--) {
+       JSAMPLE r = read_pbm_integer(cinfo, infile, maxval);
+@@ -4036,9 +4036,9 @@
+   register JSAMPLE *rescale = source->rescale;
+   JDIMENSION col;
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   bufferptr = source->iobuffer;
+   for (col = cinfo->image_width; col > 0; col--) {
+     *ptr++ = rescale[((int)(*bufferptr++))];
+@@ -4064,9 +4064,9 @@
+   register int aindex = alpha_index[cinfo->in_color_space];
+   register int ps = rgb_pixelsize[cinfo->in_color_space];
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   bufferptr = source->iobuffer;
+   if (maxval == 255) {
+     if (aindex >= 0)
+@@ -4095,9 +4095,9 @@
+   JDIMENSION col;
+   unsigned int maxval = source->maxval;
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   bufferptr = source->iobuffer;
+   if (maxval == 255) {
+     for (col = cinfo->image_width; col > 0; col--) {
+@@ -4132,9 +4132,9 @@
+   register int aindex = alpha_index[cinfo->in_color_space];
+   register int ps = rgb_pixelsize[cinfo->in_color_space];
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   bufferptr = source->iobuffer;
+   if (maxval == 255) {
+     if (aindex >= 0)
+@@ -4163,9 +4163,9 @@
+   JDIMENSION col;
+   unsigned int maxval = source->maxval;
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   bufferptr = source->iobuffer;
+   if (maxval == 255) {
+     for (col = cinfo->image_width; col > 0; col--) {
+@@ -4197,7 +4197,7 @@
+ {
+   ppm_source_ptr source = (ppm_source_ptr)sinfo;
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+   return 1;
+ }
+@@ -4214,9 +4214,9 @@
+   JDIMENSION col;
+   unsigned int maxval = source->maxval;
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   bufferptr = source->iobuffer;
+   for (col = cinfo->image_width; col > 0; col--) {
+     register unsigned int temp;
+@@ -4241,9 +4241,9 @@
+   JDIMENSION col;
+   unsigned int maxval = source->maxval;
+ 
+-  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (source->pub.input_file))) == ((size_t)(source->buffer_width))))
++  if (!(((size_t)fread((void *)(source->iobuffer), (size_t)1, (size_t)(source->buffer_width), (sinfo->input_file))) == ((size_t)(source->buffer_width))))
+     ((cinfo)->err->msg_code = (JERR_INPUT_EOF), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+-  ptr = source->pub.buffer[0];
++  ptr = sinfo->buffer[0];
+   bufferptr = source->iobuffer;
+   for (col = cinfo->image_width; col > 0; col--) {
+     register unsigned int temp;
+@@ -4279,10 +4279,10 @@
+   unsigned int w, h, maxval;
+   boolean need_iobuffer, use_raw_buffer, need_rescale;
+ 
+-  if (getc(source->pub.input_file) != 'P')
++  if (getc(sinfo->input_file) != 'P')
+     ((cinfo)->err->msg_code = (JERR_PPM_NOT), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+ 
+-  c = getc(source->pub.input_file);
++  c = getc(sinfo->input_file);
+ 
+ 
+   switch (c) {
+@@ -4297,9 +4297,9 @@
+   }
+ 
+ 
+-  w = read_pbm_integer(cinfo, source->pub.input_file, 65535);
+-  h = read_pbm_integer(cinfo, source->pub.input_file, 65535);
+-  maxval = read_pbm_integer(cinfo, source->pub.input_file, 65535);
++  w = read_pbm_integer(cinfo, sinfo->input_file, 65535);
++  h = read_pbm_integer(cinfo, sinfo->input_file, 65535);
++  maxval = read_pbm_integer(cinfo, sinfo->input_file, 65535);
+ 
+   if (w <= 0 || h <= 0 || maxval <= 0)
+     ((cinfo)->err->msg_code = (JERR_PPM_NOT), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+@@ -4320,11 +4320,11 @@
+       cinfo->in_color_space = JCS_GRAYSCALE;
+     ((cinfo)->err->msg_code = (JTRC_PGM_TEXT), (cinfo)->err->msg_parm.i[0] = (w), (cinfo)->err->msg_parm.i[1] = (h), (*(cinfo)->err->emit_message) ((j_common_ptr)(cinfo), (1)));
+     if (cinfo->in_color_space == JCS_GRAYSCALE)
+-      source->pub.get_pixel_rows = get_text_gray_row;
++      sinfo->get_pixel_rows = get_text_gray_row;
+     else if ((cinfo->in_color_space == JCS_RGB || (cinfo->in_color_space >= JCS_EXT_RGB && cinfo->in_color_space <= JCS_EXT_ARGB)))
+-      source->pub.get_pixel_rows = get_text_gray_rgb_row;
++      sinfo->get_pixel_rows = get_text_gray_rgb_row;
+     else if (cinfo->in_color_space == JCS_CMYK)
+-      source->pub.get_pixel_rows = get_text_gray_cmyk_row;
++      sinfo->get_pixel_rows = get_text_gray_cmyk_row;
+     else
+       ((cinfo)->err->msg_code = (JERR_BAD_IN_COLORSPACE), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+     need_iobuffer = 0;
+@@ -4335,9 +4335,9 @@
+       cinfo->in_color_space = JCS_EXT_RGB;
+     ((cinfo)->err->msg_code = (JTRC_PPM_TEXT), (cinfo)->err->msg_parm.i[0] = (w), (cinfo)->err->msg_parm.i[1] = (h), (*(cinfo)->err->emit_message) ((j_common_ptr)(cinfo), (1)));
+     if ((cinfo->in_color_space == JCS_RGB || (cinfo->in_color_space >= JCS_EXT_RGB && cinfo->in_color_space <= JCS_EXT_ARGB)))
+-      source->pub.get_pixel_rows = get_text_rgb_row;
++      sinfo->get_pixel_rows = get_text_rgb_row;
+     else if (cinfo->in_color_space == JCS_CMYK)
+-      source->pub.get_pixel_rows = get_text_rgb_cmyk_row;
++      sinfo->get_pixel_rows = get_text_rgb_cmyk_row;
+     else
+       ((cinfo)->err->msg_code = (JERR_BAD_IN_COLORSPACE), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+     need_iobuffer = 0;
+@@ -4348,19 +4348,19 @@
+       cinfo->in_color_space = JCS_GRAYSCALE;
+     ((cinfo)->err->msg_code = (JTRC_PGM), (cinfo)->err->msg_parm.i[0] = (w), (cinfo)->err->msg_parm.i[1] = (h), (*(cinfo)->err->emit_message) ((j_common_ptr)(cinfo), (1)));
+     if (maxval > 255) {
+-      source->pub.get_pixel_rows = get_word_gray_row;
++      sinfo->get_pixel_rows = get_word_gray_row;
+     } else if (maxval == 255 && sizeof(JSAMPLE) == sizeof(U_CHAR) &&
+                cinfo->in_color_space == JCS_GRAYSCALE) {
+-      source->pub.get_pixel_rows = get_raw_row;
++      sinfo->get_pixel_rows = get_raw_row;
+       use_raw_buffer = 1;
+       need_rescale = 0;
+     } else {
+       if (cinfo->in_color_space == JCS_GRAYSCALE)
+-        source->pub.get_pixel_rows = get_scaled_gray_row;
++        sinfo->get_pixel_rows = get_scaled_gray_row;
+       else if ((cinfo->in_color_space == JCS_RGB || (cinfo->in_color_space >= JCS_EXT_RGB && cinfo->in_color_space <= JCS_EXT_ARGB)))
+-        source->pub.get_pixel_rows = get_gray_rgb_row;
++        sinfo->get_pixel_rows = get_gray_rgb_row;
+       else if (cinfo->in_color_space == JCS_CMYK)
+-        source->pub.get_pixel_rows = get_gray_cmyk_row;
++        sinfo->get_pixel_rows = get_gray_cmyk_row;
+       else
+         ((cinfo)->err->msg_code = (JERR_BAD_IN_COLORSPACE), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+     }
+@@ -4371,21 +4371,21 @@
+       cinfo->in_color_space = JCS_EXT_RGB;
+     ((cinfo)->err->msg_code = (JTRC_PPM), (cinfo)->err->msg_parm.i[0] = (w), (cinfo)->err->msg_parm.i[1] = (h), (*(cinfo)->err->emit_message) ((j_common_ptr)(cinfo), (1)));
+     if (maxval > 255) {
+-      source->pub.get_pixel_rows = get_word_rgb_row;
++      sinfo->get_pixel_rows = get_word_rgb_row;
+     } else if (maxval == 255 && sizeof(JSAMPLE) == sizeof(U_CHAR) &&
+                (cinfo->in_color_space == JCS_EXT_RGB
+ 
+                 || cinfo->in_color_space == JCS_RGB
+ 
+                )) {
+-      source->pub.get_pixel_rows = get_raw_row;
++      sinfo->get_pixel_rows = get_raw_row;
+       use_raw_buffer = 1;
+       need_rescale = 0;
+     } else {
+       if ((cinfo->in_color_space == JCS_RGB || (cinfo->in_color_space >= JCS_EXT_RGB && cinfo->in_color_space <= JCS_EXT_ARGB)))
+-        source->pub.get_pixel_rows = get_rgb_row;
++        sinfo->get_pixel_rows = get_rgb_row;
+       else if (cinfo->in_color_space == JCS_CMYK)
+-        source->pub.get_pixel_rows = get_rgb_cmyk_row;
++        sinfo->get_pixel_rows = get_rgb_cmyk_row;
+       else
+         ((cinfo)->err->msg_code = (JERR_BAD_IN_COLORSPACE), (*(cinfo)->err->error_exit) ((j_common_ptr)(cinfo)));
+     }
+@@ -4417,14 +4417,14 @@
+ 
+ 
+     source->pixrow = (JSAMPROW)source->iobuffer;
+-    source->pub.buffer = &source->pixrow;
+-    source->pub.buffer_height = 1;
++    sinfo->buffer = &source->pixrow;
++    sinfo->buffer_height = 1;
+   } else {
+ 
+-    source->pub.buffer = (*cinfo->mem->alloc_sarray)
++    sinfo->buffer = (*cinfo->mem->alloc_sarray)
+       ((j_common_ptr)cinfo, 1,
+        (JDIMENSION)w * cinfo->input_components, (JDIMENSION)1);
+-    source->pub.buffer_height = 1;
++    sinfo->buffer_height = 1;
+   }
+ 
+ 
+@@ -4467,12 +4467,9 @@
+   ppm_source_ptr source;
+ 
+ 
+-  source = (ppm_source_ptr)
+-    (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, 1,
+-                                sizeof(ppm_source_struct));
+-
++  source = (ppm_source_ptr) malloc(sizeof(ppm_source_struct)) ;
+   source->pub.start_input = start_input_ppm;
+   source->pub.finish_input = finish_input_ppm;
+ 
+-  return (cjpeg_source_ptr)source;
++  return (cjpeg_source_ptr)&source->pub;
+ }

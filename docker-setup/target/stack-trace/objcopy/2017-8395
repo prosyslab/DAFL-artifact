@@ -1,0 +1,16 @@
+cache.c:336
+cache.c:370
+bfdio.c:196
+libbfd.c:813
+section.c:1619
+compress.c:561
+elf.c:1160
+elf.c:2009
+elfcode.h:804
+format.c:253
+format.c:94
+archive.c:887
+format.c:311
+objcopy.c:2832
+objcopy.c:4792
+objcopy.c:4893

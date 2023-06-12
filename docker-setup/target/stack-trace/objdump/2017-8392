@@ -1,0 +1,15 @@
+libbfd.c:548
+dwarf2.c:597
+dwarf2.c:2960
+dwarf2.c:4291
+elf.c:8565
+objdump.c:1434
+objdump.c:1728
+objdump.c:2241
+section.c:1395
+objdump.c:2375
+objdump.c:3469
+objdump.c:3526
+objdump.c:3615
+objdump.c:3636
+objdump.c:3919
