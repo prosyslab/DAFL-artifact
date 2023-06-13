@@ -13,7 +13,6 @@ The system requirements depend on the desired experimental throughput.
 For example, if you want to run 10 fuzzing sessions in parallel,
 we recommend using a machine with at least 16 cores and 64 GB of RAM.
 
-
 You can set the number of iterations to be run in parallel and the amount of RAM to assign to each fuzzing session
 by modifying the `MAX_INSTANCE_NUM` and `MEM_PER_INSTANCE` variables in `scripts/common.py`.
 The default values are 40 and 4, respectively.
@@ -55,22 +54,25 @@ $ echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_gover
 
 ### __1.3. Preparing the Docker image__
 
+Our artifact is composed of two parts: the Docker image and the framework to build and utilize it.
+The Docker image contains all the necessary tools and dependencies to run the fuzzing experiments.
+The framework, which holds this README file, is used to build the Docker image and orchestrate the fuzzing experiments.
+
 **Recommended**
 You can pull the pre-built Docker image from Dockerhub.
 
 To do so, run
 ```
-$ docker pull 2023dafl/dafl
-$ docker tag 2023dafl/dafl directed-benchmark
+$ docker pull prosyslab/dafl-artifact
 ```
-The image is big (around 20 GB) and it may take a while to download.
+The image is big (around 25 GB) and it may take a while to download.
 
 **DIY**
 If you want to build the docker image yourself, run
 ```
-docker build -t directed-benchmark -f Dockerfile .
+docker build -t prosyslab/dafl-artifact -f Dockerfile .
 ```
-However, we do not recommend this because it will take an extremely long time (up to 2~3 days) to build.
+However, we do not recommend this because it will take an extremely long time (up to 3~4 days) to build.
 Nonetheless, we provide the Docker file and the relevant scripts to show how the Docker image was built.
 
 &nbsp;
@@ -78,7 +80,7 @@ Nonetheless, we provide the Docker file and the relevant scripts to show how the
 ## 2. __Directory structure__
 
 
-### __2.1. Local directory structure__
+### __2.1. Local framework structure__
 
 ```
 ├─ README.md                     <- The top-level README (this file)
@@ -98,19 +100,19 @@ Nonetheless, we provide the Docker file and the relevant scripts to show how the
 │  │  └─ stack-trace             <- Target stack trace (for AFLGo)
 │  │
 │  ├─ tool-script                <- Directory for fuzzing scripts
-│  │  └─ run_*.sh                <- The fuzzing scripts to run each fuzzing tool.
+│  │  └─ run_*.sh                <- The fuzzing scripts to run each fuzzing tool
 │  │
 │  ├─ Beacon-binaries            <- Binaries extracted from the provided Docker image
-│  │                                (yguoaz/beacon: Docker SHA256 hash a09c8cb.)
+│  │                                (yguoaz/beacon: Docker SHA256 hash a09c8cb)
 │  │
 │  ├─ windranger.tar.gz          <- Implementation of WindRanger extracted from the provided Docker image
-│  │                                (ardu/windranger: Docker SHA256 hash 8614ceb.)
+│  │                                (ardu/windranger: Docker SHA256 hash 8614ceb)
 │  │
-│  └─ setup_*.sh                 <- The setup scripts to setup each fuzzing tool.
+│  └─ setup_*.sh                 <- The setup scripts to setup each fuzzing tool
 │  └─ build_bench_*.sh           <- The build scripts to build the target programs
 │
-├─ DAFL                          <- Implementation of DAFL, the fuzzer.
-├─ DAFL_energy                   <- Variant of DAFL that uses only utilizes energy scheduling.
+├─ DAFL                          <- Implementation of DAFL, the fuzzer
+├─ DAFL_energy                   <- Variant of DAFL that uses only utilizes energy scheduling
 │
 ├─ sparrow                       <- Implementation of Sparrow, the static analyzer
 │
@@ -122,9 +124,9 @@ Nonetheless, we provide the Docker file and the relevant scripts to show how the
 │
 ├─ Dockerfile                    <- Docker file used to build the Docker image
 │
-├─ sa_overhead.csv               <- Static analysis overheads for each tool.
+├─ sa_overhead.csv               <- Static analysis overheads for each tool
 │
-└─ requirements.txt              <- Python requirements for the scripts.
+└─ requirements.txt              <- Python requirements for the scripts
 ```
 
 
@@ -151,18 +153,18 @@ Nonetheless, we provide the Docker file and the relevant scripts to show how the
 │  ├─ DAFL-input                 <- Input files for DAFL
 │  │  ├─ dfg                     <- Data flow graph
 │  │  └─ inst-targ               <- Instrumentation targets (list of functions)
-│  ├─ DAFL-input-naive           <- Input files for DAFL, but with naive slicing.
+│  ├─ DAFL-input-naive           <- Input files for DAFL, but with naive slicing
 │  │
 │  └─ build_bench_*.sh           <- The build scripts to build the target programs
-│                                   for each fuzzing tool.
+│                                   for each fuzzing tool
 │
 ├─ fuzzer                        <- Directory for fuzzing tools
 │  ├─ AFL                        <- The initial rule used for
 │  ├─ ...
-│  └─ setup_*.sh                 <- The setup scripts to setup each fuzzing tool.
+│  └─ setup_*.sh                 <- The setup scripts to setup each fuzzing tool
 │
 ├─ tool-script                   <- Directory for fuzzing scripts
-│  └─ run_*.sh                   <- The fuzzing scripts to run each fuzzing tool.
+│  └─ run_*.sh                   <- The fuzzing scripts to run each fuzzing tool
 │                                    
 └─ sparrow                       <- Implementation of Sparrow, the static analyzer
 ```
@@ -172,7 +174,28 @@ Nonetheless, we provide the Docker file and the relevant scripts to show how the
 
 &nbsp;
 
-### __3.1. Running the experiments in each table and figure__
+### __3.1. Running the experiment on specific targets__
+
+To run the experiment on specific targets, you can run
+```
+$ python3 ./scripts/reproduce.py run [target] [timelimit] [iteration] [tool list]
+```
+
+For example, you can run the experiment on CVE `2018-11496` in `lrzip-ed51e14` for 60 seconds and 40 iterations
+with the tool `AFL`, `AFLGo`, `WindRanger`, `Beacon`, and `DAFL` by the following command.
+```
+$ python3 ./scripts/reproduce.py run lrzip-ed51e14-2018-11496 60 40 "AFL AFLGo WindRanger Beacon DAFL"
+```
+
+The result will be parsed and summarized in a CSV file, `lrzip-ed51e14-2018-11496.csv`,
+under `output/lrzip-ed51e14-2018-11496-60sec-40iters`.
+
+For the available choices of targets, refer to the `FUZZ_TARGETS` in `scripts/benchmark.py`.
+
+
+&nbsp;
+
+### __3.2. Running the experiments in each table and figure__
 
 To reproduce the results in each table and figure, you can use the script `scripts/reproduce.py` as the following.
 ```
@@ -193,7 +216,7 @@ FYI, you can choose from the following table/figure names.
 
 &nbsp;
 
-### __3.2. Running the scaled down version of 3.1__
+### __3.3. Running the scaled down version of 3.2__
 
 Reproducing the experiments in our paper at a full scale will take a very long time with limited resources.
 For example, we ran a 24-hour fuzzing session with 6 fuzzers on 41 targets, each repeated 40 times
@@ -229,24 +252,6 @@ the experiment script automatically reuses the results from the experiment of Ta
 to further reduce the fuzzing time.
 Just make sure that the results are under the directory `output/tbl2-scaled-86400sec-10iters`.
 
-
-&nbsp;
-
-### __3.3. Running the experiment on specific targets__
-
-To run the experiment on specific targets, you can run
-```
-$ python3 ./scripts/reproduce.py run [target] [timelimit] [iteration] [tool list]
-```
-
-For example, you can run the experiment on `2017-11728` in `swftophp-4.7` for 24 hours and 40 iterations
-with the tool `AFL`, `AFLGo` and `DAFL` by the following command.
-```
-$ python3 ./scripts/reproduce.py run swftophp-4.7-2017-11728 86400 40 "AFL AFLGo DAFL"
-```
-For the available choices of targets, refer to the `FUZZ_TARGETS` in `scripts/benchmark.py`.
-
-The result will be parsed and summarized in a CSV file, `[target].csv`, in the corresponding output directory.
 
 &nbsp;
 
