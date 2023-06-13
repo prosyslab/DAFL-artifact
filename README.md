@@ -1,6 +1,6 @@
 # DAFL: Directed Grey-box Fuzzing guided by Data Dependency (Paper Artifact)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7965041.svg)](https://doi.org/10.5281/zenodo.7965041)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8031003.svg)](https://doi.org/10.5281/zenodo.8031003)
 
 This is the artifact of the paper *DAFL: Directed Grey-box Fuzzing guided by Data Dependency* to appear in USENIX Security 2023.
 
