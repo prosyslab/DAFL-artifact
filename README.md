@@ -214,6 +214,13 @@ $ python3 ./scripts/reproduce.py run tbl2 86400 40
 FYI, you can choose from the following table/figure names.
 - `tbl2, fig7, fig8, fig9` 
 
+With a machine capable of running 40 fuzzing sessions in parallel,
+the required time for each experiment is as follows.
+- Table 2: 246 days
+- Figure 7: 96 days
+- Figure 8: 126 days
+- Figure 9: 126 days
+
 &nbsp;
 
 ### __3.3. Running the scaled down version of 3.2__
@@ -254,6 +261,13 @@ Just make sure that the results are under the directory `output/tbl2-scaled-8640
 Please keep in mind that reducing the number of iterations will cause fluctuation of the results
 due to the randomness of the fuzzing process and may be the cause of the difference in the results.
 
+With a machine capable of running 40 fuzzing sessions in parallel,
+the required time for each experiment is as follows.
+- Table 2 scaled down : 8 days
+- Figure 7 scaled down : 6 days (2 days if you reuse the results from Table 2)
+- Figure 8 scaled down: 8 days (4 days if you reuse the results from Table 2)
+- Figure 9 scaled down: 8 days (6 days if you reuse the results from Table 2)
+
 ### __3.4. Running the minimal version of 3.2__
 
 Taking the scaled-down version to an extreme, we also provide a minimal version of the experiment.
@@ -283,6 +297,12 @@ the experiment script automatically reuses the results from the experiment of Ta
 to further reduce the fuzzing time.
 Just make sure that the results are under the directory `output/tbl2-minimal-86400sec-10iters`.
 
+With a machine capable of running 40 fuzzing sessions in parallel,
+the required time for each experiment is as follows.
+- Table 2 minimal : 4 days
+- Figure 7 minimal : 3 days (1 day if you reuse the results from Table 2)
+- Figure 8 minimal: 4 days (2 days if you reuse the results from Table 2)
+- Figure 9 minimal: 4 days (3 days if you reuse the results from Table 2)
 
 &nbsp;
 
@@ -302,7 +322,7 @@ the existing fuzzing result will be parsed and summarized in a CSV file, `[figur
 
 If you run an experiment with predefined settings (i.e., the experiment in Table 2, Figure 7, Figure 8, Figure 9, or the scaled-down version of them), bar plots are automatically generated after parsing the results.
 
-Checkout the pdf file that is generated under the corresponding output directory.
+Checkout the PDF file that is generated under the corresponding output directory.
 
 &nbsp;
 
