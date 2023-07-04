@@ -142,10 +142,10 @@ def analyze_targ_result(outdir, timeout, targ, iter_cnt):
 
 def print_result(outdir, exp_id, targ_list, timeout, iter_cnt):
     df_dict = {}
-    df_dict["CVE"] = targ_list
+    df_dict["Target"] = targ_list
 
     sa_dict = read_sa_results()
-    tool_list = os.listdir(outdir)
+    tool_list = [x for x in os.listdir(outdir) if os.path.isdir(os.path.join(outdir, x))]
     for tool in tool_list:
         med_tte_list = []
         for targ in targ_list:
@@ -157,16 +157,19 @@ def print_result(outdir, exp_id, targ_list, timeout, iter_cnt):
             med_tte = median_tte(tte_list, timeout)
             if ">" in med_tte:
                 found_iter_cnt = iter_cnt - len([x for x in tte_list if (x is None or x > timeout)])
-                med_tte = "N.A. (%d/%d)" % (found_iter_cnt, iter_cnt)
+                med_tte = "N.A.(%d/%d)" % (found_iter_cnt, iter_cnt)
             else:
-                if exp_id != "figure8" and tool in sa_dict:
+                if tool in sa_dict:
                     med_tte = str( int(med_tte) + sa_dict[tool][targ] )
+                elif "DAFL" in tool:
+                    med_tte = str( int(med_tte) + sa_dict["DAFL"][targ] )
             
             med_tte_list.append(med_tte)
         df_dict[tool] = med_tte_list
     
     tte_df = pd.DataFrame.from_dict(df_dict)
     tte_df.to_csv(os.path.join(outdir, "%s.csv" % exp_id), index=False)
+    tte_df.to_csv(os.path.join(outdir, "%s.tsv" % exp_id), index=False, sep="\t")
 
 def main():
     if len(sys.argv) not in [2, 3]:

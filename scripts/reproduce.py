@@ -1,10 +1,12 @@
 import sys, os, time, csv, shutil
 from common import run_cmd, run_cmd_in_docker, check_cpu_count, fetch_works, MEM_PER_INSTANCE
-from benchmark import generate_fuzzing_worklist, FUZZ_TARGETS, SUPPLE_FUZZ_TARGETS, SCALED_FUZZ_TARGETS
+from benchmark import generate_fuzzing_worklist, FUZZ_TARGETS, SUPPLE_FUZZ_TARGETS, MINIMAL_FUZZ_TARGETS, SCALED_FUZZ_TARGETS
+from benchmark import under5000, under21600, under43200, under86400
 from parse_result import print_result
+from plot import draw_figure5, draw_figure7, draw_figure8, draw_figure9, draw_result
 
 BASE_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
-IMAGE_NAME = "prosyslab/dafl"
+IMAGE_NAME = "prosyslab/dafl-artifact"
 SUPPORTED_TOOLS = \
   ["AFL", "AFLGo", "Beacon", "WindRanger",
    "DAFL", "DAFL_noasan", "DAFL_naive", "DAFL_selIns", "DAFL_semRel", "DAFL_seedpool", "DAFL_energy", ]
@@ -94,18 +96,24 @@ def main():
     if "origin" in target:
         target = target.split("-")[1]
 
+
     if "scaled" in target:
         benchmark = "scaled"
         target_list = [x for (x,y,z,w) in SCALED_FUZZ_TARGETS]
+        
         if target == "tbl2-scaled":
             tools = ["AFL", "AFLGo", "WindRanger", "DAFL"]
-        else:
+        else:            
             if target == "fig7-scaled":
                 tools = ["AFL", "DAFL_naive", "DAFL"] 
             elif target == "fig8-scaled":
                 tools = ["AFL", "DAFL_semRel", "DAFL_selIns", "DAFL"]
             elif target == "fig9-scaled":
                 tools = ["AFL", "DAFL_energy", "DAFL_seedpool", "DAFL_semRel"]
+            else:
+                print("Invalid scaled version target!")
+                exit(1)
+            
             tbl2_scaled_dir = os.path.join(BASE_DIR, "output", "tbl2-scaled-86400sec-10iters")
             if os.path.exists(tbl2_scaled_dir):
                 outdir = decide_outdir(target, str(timelimit), str(iteration), "")
@@ -114,11 +122,33 @@ def main():
                 if target != "fig9-scaled":
                     shutil.copytree(os.path.join(tbl2_scaled_dir, "DAFL"), os.path.join(outdir, "DAFL"))
                     tools.remove("DAFL")
+
+    elif "minimal" in target:
+        benchmark = "minimal"
+        target_list = [x for (x,y,z,w) in MINIMAL_FUZZ_TARGETS]
+        if target == "tbl2-minimal":
+            tools = ["AFL", "AFLGo", "WindRanger", "DAFL"]
+        else:
+            if target == "fig7-minimal":
+                tools = ["AFL", "DAFL_naive", "DAFL"] 
+            elif target == "fig8-minimal":
+                tools = ["AFL", "DAFL_semRel", "DAFL_selIns", "DAFL"]
+            elif target == "fig9-minimal":
+                tools = ["AFL", "DAFL_energy", "DAFL_seedpool", "DAFL_semRel"]
+            tbl2_minimal_dir = os.path.join(BASE_DIR, "output", "tbl2-minimal-86400sec-10iters")
+            if os.path.exists(tbl2_minimal_dir):
+                outdir = decide_outdir(target, str(timelimit), str(iteration), "")
+                tools.remove("AFL")
+                shutil.copytree(os.path.join(tbl2_minimal_dir, "AFL"), os.path.join(outdir, "AFL"))
+                if target != "fig9-minimal":
+                    shutil.copytree(os.path.join(tbl2_minimal_dir, "DAFL"), os.path.join(outdir, "DAFL"))
+                    tools.remove("DAFL")
+
     elif target == "tbl2":
         benchmark = "all"
         target_list = [x for (x,y,z,w) in FUZZ_TARGETS]
         tools = ["AFL", "AFLGo", "WindRanger", "DAFL", "Beacon", "DAFL_noasan"]
-    elif target in ["fig7", "fig8", "figure9"]:
+    elif target in ["fig7", "fig8", "fig9"]:
         benchmark = "supple"
         target_list = [x for (x,y,z,w) in SUPPLE_FUZZ_TARGETS]
         if target == "fig7":
@@ -145,23 +175,45 @@ def main():
     else:
         print("Invalid target!")
 
+    ### 1. Run fuzzing
     if action == "run":
         for tool in tools:
             worklist = generate_fuzzing_worklist(benchmark, iteration)
             outdir = decide_outdir(target, str(timelimit), str(iteration), tool)
             while len(worklist) > 0:
                 works = fetch_works(worklist)
+
+                ### Adjust timeout in case of scaled version
+                if "scaled" in target:
+                    target_bug, _, _, _ = works[0]
+                    if target_bug in under5000:
+                        timelimit = 5000
+                    elif target_bug in under21600:
+                        timelimit = 21600
+                    elif target_bug in under43200:
+                        timelimit = 43200
+                    elif target_bug in under86400:
+                        timelimit = 86400
+
                 spawn_containers(works)
                 run_fuzzing(works, tool, timelimit)
                 wait_finish(works, timelimit)
                 store_outputs(works, outdir)
                 cleanup_containers(works)
-    
+                
+                #### Reset timelimit to user input
+                timelimit = int(sys.argv[3])
+
     if "origin" in sys.argv[2]:
         outdir = decide_outdir("origin", "", "", "")
     else:
         outdir = decide_outdir(target, str(timelimit), str(iteration), "")
+    
+    ### 2. Parse and print results in CSV and TSV format
     print_result(outdir, target, target_list, timelimit,  iteration)
+
+    ### 3. Draw bar plot with TSV file
+    draw_result(outdir, target)
 
 
 if __name__ == "__main__":

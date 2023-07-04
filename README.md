@@ -224,16 +224,15 @@ for the main experiment described in Section 4.2 of our paper.
 If run on a single machine capable of running 40 fuzzing sessions in parallel, this experiment takes 246 days of fuzzing time.
 Thus, we provide a scaled-down version of the experiment that can be run in a reasonable amount of time.
 Under the assumption of running the experiment on a machine that is capable to run 40 fuzzing sessions in parallel,
-each scaled-down version of the experiment can be run in 1~4 days.
+each scaled-down version of the experiment can be run in 2~8 days.
 
-This scaled down version comprises the following four targets:
-- swftophp-4.8-2018-11225
-- swftophp-4.8-2019-12982
-- xmllint-2017-9048
-- cjpeg-1.5.90-2018-14498
+The scaled-down version excludes targets where all the fuzzers resulted in timeout.
+Evaluating such targets are time-consuming, and the results are less comparable to each other.
+Thus, we excluded 9 targets by commenting them out from the list `SCALED_FUZZ_TARGETS` in `scripts/benchmark.py`.
 
-These targets are chosen because they clearly demonstrate the effectiveness of DAFL,
-while other fuzzers have hard time reproducing them.
+For the remaining targets, we run the experiment with a shorter time limit.
+This time limit is set based on the previous observation of the TTE required for each target.
+Refer to the lists `under*` in `scripts/benchmark.py` for the time limit set for each target.
 
 The iterations in the scaled-down version of the experiment are also reduced to 10.
 Furthermore, for the experiment in Table 2, we only run the experiment where ASAN options are enabled,
@@ -252,10 +251,42 @@ the experiment script automatically reuses the results from the experiment of Ta
 to further reduce the fuzzing time.
 Just make sure that the results are under the directory `output/tbl2-scaled-86400sec-10iters`.
 
+Please keep in mind that reducing the number of iterations will cause fluctuation of the results
+due to the randomness of the fuzzing process and may be the cause of the difference in the results.
+
+### __3.4. Running the minimal version of 3.2__
+
+Taking the scaled-down version to an extreme, we also provide a minimal version of the experiment.
+If you are in real hurry, you can choose to run this version.
+
+This minimal version comprises the following four targets:
+- swftophp-4.8-2018-11225
+- swftophp-4.8-2019-12982
+- xmllint-2017-9048
+- cjpeg-1.5.90-2018-14498
+
+These targets are chosen because they clearly demonstrate the effectiveness of DAFL,
+while other fuzzers have hard time reproducing them.
+
+The rest is same as the scaled-down version.
+
+To run the minimal version of the experiment, run the experiment with the `-minimal` attached to the target argument.
+For example, to run the scaled-down version of the experiment in Table 2, run
+```
+$ python3 ./scripts/reproduce.py run tbl2-minimal 86400 10
+```
+This will run four fuzzers, AFL, AFLGo, WindRanger, DAFL on aforementioned four targets, each repeated 10 times for 24 hours. 
+
+Note that running AFL and DAFL is common to all experiments (Table 2, Figure 7, Figure 8, Figure 9).
+Once you have run the experiment for Table 2,
+the experiment script automatically reuses the results from the experiment of Table 2 for the following experiments
+to further reduce the fuzzing time.
+Just make sure that the results are under the directory `output/tbl2-minimal-86400sec-10iters`.
+
 
 &nbsp;
 
-### __3.4. Parsing the results__
+### __3.5. Parsing the results__
 
 If you have already run the fuzzing sessions and only want to parse the results, you can run
 ```
@@ -264,6 +295,14 @@ $ python3 ./scripts/reproduce.py parse [figure/table/target] [timelimit] [iterat
 
 If the corresponding output directory exists in the form of `[table/figure/target]-[timelimit]sec-[iteration]iters`,
 the existing fuzzing result will be parsed and summarized in a CSV file, `[figure/table/target].csv`, under the corresponding output directory
+
+&nbsp;
+
+### __3.5. Plotting the results__
+
+If you run an experiment with predefined settings (i.e., the experiment in Table 2, Figure 7, Figure 8, Figure 9, or the scaled-down version of them), bar plots are automatically generated after parsing the results.
+
+Checkout the pdf file that is generated under the corresponding output directory.
 
 &nbsp;
 
@@ -277,8 +316,8 @@ Note that the size of the file after extraction is about 48GB, so be sure to hav
 Run
 ```
 wget or download the archived file
-tar -xvf [file name]
-mv [directory name] output/origin
+tar -xvf DAFL_experiments.tar.gz
+mv DAFL_experiments output/origin
 ```
 Then you can parse the results by running the following command to get the same results as in the paper.
 ```
