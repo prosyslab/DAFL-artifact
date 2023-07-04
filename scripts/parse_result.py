@@ -140,13 +140,12 @@ def analyze_targ_result(outdir, timeout, targ, iter_cnt):
     print("Timeout iterations: %s" % timeout_list)
     print("------------------------------------------------------------------")
 
-def print_result(outdir, exp_id, targ_list, timeout, iter_cnt):
+def print_result(outdir, exp_id, targ_list, timeout, iter_cnt, tools):
     df_dict = {}
     df_dict["Target"] = targ_list
 
     sa_dict = read_sa_results()
-    tool_list = [x for x in os.listdir(outdir) if os.path.isdir(os.path.join(outdir, x))]
-    for tool in tool_list:
+    for tool in tools:
         med_tte_list = []
         for targ in targ_list:
             tte_list = []
