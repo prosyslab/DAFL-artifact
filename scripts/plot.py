@@ -11,7 +11,7 @@ def draw_figure5(input_dir, input_file):
     output_dir = input_dir
     input_path = os.path.join(input_dir, input_file)
 
-    plt.rc('text', usetex=True)
+    plt.rc('text')
     matplotlib.rcParams['hatch.linewidth'] = 2.0
     df = pd.read_csv(input_path, delimiter='\t', index_col='Target')
 
@@ -118,7 +118,7 @@ def draw_figure5(input_dir, input_file):
     # Note:
     # "ncol=5" : makes tools to be in one row, becase there are 5 of them.
     # "bbox_to_anchor" : makes the legend box to stay out of the plot.
-    plt.legend(( r'\textsc{AFL}', r'\textsc{AFLGo}', r'\textsc{WindRanger}', r'\textsc{DAFL}' ),
+    plt.legend(( 'AFL', 'AFLGo', 'WindRanger', 'DAFL' ),
                fontsize=tickfontsize-2, ncol=5, bbox_to_anchor=(0.70,1.12))
 
     plt.margins(0.01)
@@ -131,7 +131,7 @@ def draw_figure7(input_dir, input_file):
     output_dir = input_dir
     input_path = os.path.join(input_dir, input_file)
 
-    plt.rc('text', usetex=True)
+    plt.rc('text')
     matplotlib.rcParams['hatch.linewidth'] = 2.0
     df = pd.read_csv(input_path, delimiter='\t',  index_col='Target')
 
@@ -235,7 +235,7 @@ def draw_figure7(input_dir, input_file):
     # Note:
     # The order of legend is messy in order to enhance the presentation
     # "bbox_to_anchor" : makes the legend box to stay out of the plot.
-    plt.legend(( r'\textsc{AFL}', r'$\textsc{DAFL}_\textit{\textrm{\large Naive}}$', r'\textsc{DAFL}'),
+    plt.legend(( 'AFL', 'DAFL_Naive', 'DAFL'),
                fontsize=tickfontsize, ncol=3, bbox_to_anchor=(0.6,1.2))
 
     plt.margins(0.01)
@@ -247,7 +247,7 @@ def draw_figure8(input_dir, input_file):
     output_dir = input_dir
     input_path = os.path.join(input_dir, input_file)
 
-    plt.rc('text', usetex=True)
+    plt.rc('text')
     matplotlib.rcParams['hatch.linewidth'] = 2.0
     df = pd.read_csv(input_path, delimiter='\t',  index_col='Target')
 
@@ -356,7 +356,7 @@ def draw_figure8(input_dir, input_file):
     # Note:
     # "ncol=4" : makes tools to be in one row, becase there are 4 of them.
     # "bbox_to_anchor" : makes the legend box to stay out of the plot.
-    plt.legend((  r'\textsc{AFL}', r'$\textsc{DAFL}_\textit{\textrm{\large SemRel}}$', r'$\textsc{DAFL}_\textit{\textrm{\large SelInst}}$', r'$\textsc{DAFL}$' ),
+    plt.legend((  'AFL', 'DAFL_SemRel', 'DAFL_SelInst', 'DAFL' ),
                fontsize=tickfontsize, ncol=4, bbox_to_anchor=(0.73,1.2))
 
     plt.margins(0.01)
@@ -368,7 +368,7 @@ def draw_figure9(input_dir, input_file):
     output_dir = input_dir
     input_path = os.path.join(input_dir, input_file)
 
-    plt.rc('text', usetex=True)
+    plt.rc('text')
     matplotlib.rcParams['hatch.linewidth'] = 2.0
     df = pd.read_csv(input_path, delimiter='\t',  index_col='Target')
 
@@ -474,7 +474,7 @@ def draw_figure9(input_dir, input_file):
     # Note:
     # "ncol=4" : makes tools to be in one row, becase there are 4 of them.
     # "bbox_to_anchor" : makes the legend box to stay out of the plot.
-    plt.legend((  r'\textsc{AFL}', r'$\textsc{DAFL}_\textit{\textrm{\large SeedPool}}$', r'$\textsc{DAFL}_\textit{\textrm{\large Energy}}$', r'$\textsc{DAFL}_\textit{\textrm{\large SemRel}}$' ),
+    plt.legend((  'AFL', 'DAFL_SeedPool', 'DAFL_Energy', 'DAFL_SemRel$' ),
                fontsize=tickfontsize, ncol=4, bbox_to_anchor=(0.75,1.25))
 
     plt.margins(0.01)
