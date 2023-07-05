@@ -169,7 +169,7 @@ def main():
         benchmark = target
         target_list = [target]
         if len(sys.argv) == 6:
-            tools = sys.argv[5].split()
+            tools += sys.argv[5].split()
             if not all([x in SUPPORTED_TOOLS for x in tools]):
                 print("Invalid tool in the list! Choose from %s" % SUPPORTED_TOOLS)
                 exit(1)
