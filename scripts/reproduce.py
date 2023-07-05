@@ -103,7 +103,7 @@ def main():
         target_list = [x for (x,y,z,w) in SCALED_FUZZ_TARGETS]
         
         if target == "tbl2-scaled":
-            tools = ["AFL", "AFLGo", "WindRanger", "DAFL"]
+            tools += ["AFL", "AFLGo", "WindRanger", "DAFL"]
         else:            
             if target == "fig7-scaled":
                 tools += ["AFL", "DAFL_naive", "DAFL"] 
@@ -129,7 +129,7 @@ def main():
         benchmark = "minimal"
         target_list = [x for (x,y,z,w) in MINIMAL_FUZZ_TARGETS]
         if target == "tbl2-minimal":
-            tools = ["AFL", "AFLGo", "WindRanger", "DAFL"]
+            tools += ["AFL", "AFLGo", "WindRanger", "DAFL"]
         else:
             if target == "fig7-minimal":
                 tools += ["AFL", "DAFL_naive", "DAFL"] 
