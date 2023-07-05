@@ -443,7 +443,11 @@ def draw_figure9(input_dir, input_file):
         i = 0
         to_x_list=[]
         for tool in tools:
-            tte = int(tools[tool][j])
+            if "N.A." in str(tools[tool][j]):
+                tte = 86400
+            else:
+                tte = int(tools[tool][j])
+
             x_cord = xidx + (i - 1) * (bar_width+0.04)
 
             plt.bar(x_cord,
@@ -474,7 +478,7 @@ def draw_figure9(input_dir, input_file):
     # Note:
     # "ncol=4" : makes tools to be in one row, becase there are 4 of them.
     # "bbox_to_anchor" : makes the legend box to stay out of the plot.
-    plt.legend((  'AFL', 'DAFL_SeedPool', 'DAFL_Energy', 'DAFL_SemRel$' ),
+    plt.legend((  'AFL', 'DAFL_SeedPool', 'DAFL_Energy', 'DAFL_SemRel' ),
                fontsize=tickfontsize, ncol=4, bbox_to_anchor=(0.75,1.25))
 
     plt.margins(0.01)
