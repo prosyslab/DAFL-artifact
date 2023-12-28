@@ -328,7 +328,7 @@ Checkout the PDF file that is generated under the corresponding output directory
 
 ## __4. The results of the experiments in the paper__
 
-You can retrieve the results of the experiments in the paper from [here](url).
+You can retrieve the results of the experiments in the paper from [here](https://zenodo.org/records/8219904).
 Download the file `DAFL_experiments.tar.gz`, extract the files, and move them to the appropriate
 location with the following command.
 Note that the size of the file after extraction is about 48GB, so be sure to have enough storage space
