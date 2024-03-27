@@ -20,7 +20,7 @@ FUZZ_TARGETS = [
     ("swftophp-4.8.1-2019-9114", "@@", "file", check_swftophp_2019_9114),
     ("swftophp-4.8-2019-12982", "@@", "file", check_swftophp_2019_12982),
     ("swftophp-4.8-2020-6628", "@@", "file", check_swftophp_2020_6628),
-    ("lrzip-9de7ccb-2017-8846", "-t @@", "file", check_lrzip_2017_8846),
+    ("lrzip-9de7ccb-2017-8846", "-m 10 -t @@", "file", check_lrzip_2017_8846),
     ("lrzip-ed51e14-2018-11496", "-t @@", "file", check_lrzip_2018_11496),
     ("cxxfilt-2016-4487", "", "stdin", check_cxxfilt_2016_4487),
     ("cxxfilt-2016-4489", "", "stdin", check_cxxfilt_2016_4489),
