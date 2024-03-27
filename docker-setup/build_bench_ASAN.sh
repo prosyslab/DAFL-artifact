@@ -26,6 +26,7 @@ function build_with_ASAN() {
     rm -rf RUNDIR-$1 || exit 1
 }
 
+export TOOL_NAME="ASAN"
 # Build with ASAN only
 mkdir -p /benchmark/bin/ASAN
 build_with_ASAN "libming-4.7" \
