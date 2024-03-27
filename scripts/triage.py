@@ -18,8 +18,9 @@ def get_crash_func(buf):
     return line.split()[-1]
 
 # Get the direct caller of the function that crashed.
-def get_crash_func_caller(buf):
-    match = re.search(r"#1 0x[0-9a-f]+ in [\S]+", buf)
+def get_crash_func_caller(buf, idx=1):
+    rstr = "#{}".format(idx) + r" 0x[0-9a-f]+ in [\S]+"
+    match = re.search(rstr, buf)
     if match is None:
         return ""
     start_idx, end_idx = match.span()
@@ -183,7 +184,7 @@ def check_swftophp_2018_8807(buf):
         # Consider the crash at "decompile.c:398" as the same CVE (referred to
         # the various stack traces in CVE-2018-8962).
         if check_any(buf, ["decompile.c:349", "decompile.c:398"]):
-            if get_crash_func_caller(buf) == "decompileCALLFUNCTION":
+            if get_crash_func_caller(buf, 2) == "decompileCALLFUNCTION":
                 return True
         # Crash also occurs at the caller itself. Conservatively say no.
     return False
