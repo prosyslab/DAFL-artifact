@@ -50,7 +50,7 @@ build_with_DAFL "binutils-2.28" \
     "objcopy 2017-8393 2017-8394 2017-8395" &
 build_with_DAFL "binutils-2.31.1" "objdump-2.31.1 2018-17360" &
 build_with_DAFL "binutils-2.27" "strip 2017-7303" &
-build_with_DAFL "binutils-2.29" "nm 2017-16828" &
+build_with_DAFL "binutils-2.29" "nm 2017-14940" &
 build_with_DAFL "libxml2-2.9.4" "xmllint 2017-5969 2017-9047 2017-9048" &
 build_with_DAFL "libjpeg-1.5.90" "cjpeg-1.5.90 2018-14498" &
 build_with_DAFL "libjpeg-2.0.4" "cjpeg-2.0.4 2020-13790" &
