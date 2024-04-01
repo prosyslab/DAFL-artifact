@@ -56,7 +56,7 @@ $ echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_gover
 
 Our artifact is composed of two parts: the Docker image and the framework to build and utilize it.
 The Docker image contains all the necessary tools and dependencies to run the fuzzing experiments.
-The framework, which holds this README file, is used to build the Docker image and orchestrate the fuzzing experiments.
+The framework, that holds this README file, is used to build the Docker image and orchestrate the fuzzing experiments.
 
 **Recommended**
 You can pull the pre-built Docker image from Dockerhub.

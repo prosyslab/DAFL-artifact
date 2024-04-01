@@ -49,7 +49,7 @@ function build_with_AFLGo() {
             ### copy results
             copy_build_result $1 $BIN_NAME $BUG_NAME "AFLGo"
             rm -rf /benchmark/RUNDIR-$1
-            rm -rf /benchmark/temp-$BIN_NAME-$BUG_NAME
+            rm -rf $TMP_DIR
         done
     done
 }
