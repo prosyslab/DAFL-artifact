@@ -58,6 +58,7 @@ COPY docker-setup/setup_AFLGo.sh /fuzzer/setup_AFLGo.sh
 RUN ./setup_AFLGo.sh
 
 COPY docker-setup/windranger.tar.gz /fuzzer/windranger.tar.gz
+COPY docker-setup/AddSan.cc /fuzzer
 COPY docker-setup/setup_WindRanger.sh /fuzzer/setup_WindRanger.sh
 RUN ./setup_WindRanger.sh
 

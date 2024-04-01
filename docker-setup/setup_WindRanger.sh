@@ -29,3 +29,11 @@ if ! [ -x "$(command -v gclang)"  ]; then
     go get github.com/SRI-CSL/gllvm/cmd/...
     export PATH=/root/go/bin:$PATH
 fi
+
+## Build llvm module pass to insert ASAN atributes to all functions.
+export PATH=/usr/lib/llvm-10/bin:$PATH
+export PATH=/usr/lib/llvm-10/lib:$PATH
+
+cd /fuzzer/WindRanger
+mv /fuzzer/AddSan.cc ./
+clang++ -shared -o AddSan.so AddSan.cc `llvm-config --cxxflags`

@@ -31,7 +31,7 @@ function build_with_WindRanger() {
         cd RUNDIR-$1
         get-bc $BIN_NAME || exit 1
 
-        if  [[ "$BIN_NAME" == *"cjpeg"* || $BIN_NAME == "avconv" ]]; then
+        if  [[ "$BIN_NAME" == *"cjpeg"* ]]; then
             build_target $1 $CC $CXX $BIT_OPT
         fi
 
@@ -39,8 +39,22 @@ function build_with_WindRanger() {
             mkdir output-$BIN_NAME
             cd output-$BIN_NAME
             cp ../$BIN_NAME.bc ./
+
             /fuzzer/WindRanger/instrument/bin/cbi --targets=/benchmark/target/line/$BIN_NAME/$BUG_NAME ./$BIN_NAME.bc
-            $2 ./$BIN_NAME.ci.bc $3 -fsanitize=address $BIT_OPT -o ./$BIN_NAME-$BUG_NAME
+            
+            ## Sanitizer may not function correctly when compiling from LLVM's bitcode
+            ## https://github.com/google/sanitizers/issues/1476
+            ## Thus, we manually insert sanitizer attributes to the functions with llvm module pass
+            ## We omit nm, strip, and objcopy since they seem to crash differently when sanitizer attributes are inserted
+            ## This fix was suggested by Liu Song (songliu@psu.edu)
+            if [[ "$BIN_NAME" != "nm" && "$BIN_NAME" != "strip" && "$BIN_NAME" != "objcopy" ]]; then
+                opt -load /fuzzer/WindRanger/AddSan.so -add-sanitize-address < $BIN_NAME.ci.bc > $BIN_NAME.asan.ci.bc
+            else
+                ## handle nm, strip, and objcopy
+                cp $BIN_NAME.ci.bc $BIN_NAME.asan.ci.bc
+            fi
+            
+            $2 $BIN_NAME.asan.ci.bc $3 -fsanitize=address $BIT_OPT -o ./$BIN_NAME-$BUG_NAME
 
             cp ./$BIN_NAME-$BUG_NAME /benchmark/bin/WindRanger/$BIN_NAME-$BUG_NAME || exit 1
             cp ./distance.txt /benchmark/bin/WindRanger/$BIN_NAME-$BUG_NAME-distance.txt
@@ -59,7 +73,7 @@ export PATH=/usr/lib/llvm-10/bin:$PATH
 export PATH=/usr/lib/llvm-10/lib:$PATH
 export PATH=/root/go/bin:$PATH
 
-# Build with Beacon
+# Build with WindRanger
 mkdir -p /benchmark/bin/WindRanger
 build_with_WindRanger "libming-4.7" "/fuzzer/WindRanger/fuzz/afl-clang-fast" "-lm -lz" \
     "swftophp-4.7 2016-9827 2016-9829 2016-9831 2017-9988 2017-11728 2017-11729" &
