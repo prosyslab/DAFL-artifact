@@ -12,12 +12,12 @@ function build_target() {
     export CXX=$3
     export CFLAGS="$DEFAULT_FLAGS $4"
     export CXXFLAGS="$DEFAULT_FLAGS $4"
-    #while true; do
-    #    /benchmark/project/build-target.sh $1 || continue
-    #    break
-    #done
-    # Do not run in loop until our initial integration is completed.
-    /benchmark/project/build-target.sh $1
+    # The connection to the remote source fail sometimes.
+    # Run in loop until success.
+    while true; do
+       /benchmark/project/build-target.sh $1 || continue
+       break
+    done
 }
 
 # arg1 : project name
