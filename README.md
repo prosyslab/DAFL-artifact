@@ -353,3 +353,44 @@ $ python3 ./scripts/reproduce.py parse origin-fig6 86400
 ```
 
 The CSV file will be stored in the `output/origin` directory.
+
+
+&nbsp;
+
+### __5. Expanding the artifact__
+
+#### __5.1. Adding new targets__
+You can add new targets to the artifact by following the steps below.
+
+1. Add the target program to the `docker-setup/benchmark-project` directory.
+- `build.sh` to build the project that contains the target program and `seeds` directory to store the seed inputs for the target program is required. `poc` directory to store the proof of concept inputs is optional.
+- FYI, the structure of `docker-setup/benchmark-project` is similar to Google's [Fuzzer Test Suite](https://github.com/google/fuzzer-test-suite).
+
+2. Add necessary target information.
+- Add the target line information to `docker-setup/target/line`.
+- Add a asan-based triage logic to `scripts/triage.py`.
+
+3. Add target to build scripts.
+- To build script for each fuzzing tool in `docker-setup/build_bench_*.sh`.
+- For DAFL, you need to support the target in `docker-setup/run-smake.sh` in order to prepare preprocessed source files for the static analyzer.
+
+4. Rebuild the Docker image. This step is necessary because the Docker image must contain all the target binaries to run the experiments.
+
+5. Add the target to experiment scripts
+- To the dictionary `FUZZ_TARGETS` and `SLICE_TARGETS` in `scripts/benchmark.py`.
+
+6. Add the static analysis overhead to `sa_overhead.csv`.
+
+
+#### __5.2. Adding new fuzzing tools__
+You can add new fuzzing tools to the artifact by following the steps below.
+
+1. Write a setup script for the new fuzzing tool in `docker-setup` with the name `setup_*.sh`.
+
+2. Write a build script for the new fuzzing tool in `docker-setup` with the name `build_bench_*.sh`.
+
+3. Write a run script for the new fuzzing tool in `docker-setup/tool-script` with the name `run_*.sh`.
+
+4. Add lines in the Docker script to install the new fuzzing tool.
+
+5. Add the new fuzzing tool to the dictionary `SUPPORTED_TOOLS` in `scripts/reproduce.py`.
