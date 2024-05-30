@@ -10,7 +10,7 @@ function build_with_ASAN() {
         cd /benchmark
 
         str_array=($TARG)
-        BIN_NAME=${str_array[0]}
+        export BIN_NAME=${str_array[0]}
         if  [[ $BIN_NAME == "readelf" || $BIN_NAME == "objdump-2.31.1" ]]; then
             BIT_OPT="-m32"
         else
