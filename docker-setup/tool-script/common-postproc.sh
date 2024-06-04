@@ -7,7 +7,7 @@ CRASH_LIST=$(ls output/crashes)
 # During the replay, set the following ASAN_OPTIONS again.
 export ASAN_OPTIONS=allocator_may_return_null=1,detect_leaks=0
 
-cp -f /benchmark/bin/ASAN/$1 ./$1
+cp -f /benchmark/bin/UBSAN/$1 ./$1
 echo "Crash Replay log for ${1}" > output/replay_log.txt
 
 for crash in $CRASH_LIST; do
