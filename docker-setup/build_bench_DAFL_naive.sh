@@ -35,5 +35,5 @@ function build_with_DAFL() {
 # Build with DAFL
 mkdir -p /benchmark/build_log
 mkdir -p /benchmark/bin/DAFL-naive
-build_with_DAFL "libming-4.7" \
-    "swftophp-4.7 2016-9827 2016-9829 2016-9831 2017-9988 2017-11728 2017-11729"
+build_with_DAFL "jasper-patron" \
+    "jasper-patron patron"

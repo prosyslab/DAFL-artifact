@@ -4,7 +4,7 @@
 
 # arg1 : Target project
 # arg2~: Fuzzing targets
-function build_with_ASAN() {
+function build_with_UBSAN() {
 
     for TARG in "${@:2}"; do
         cd /benchmark
@@ -29,5 +29,5 @@ function build_with_ASAN() {
 export TOOL_NAME="UBSAN"
 # Build with ASAN only
 mkdir -p /benchmark/bin/UBSAN
-build_with_ASAN "libming-4.7" \
-    "swftophp-4.7 2016-9827 2016-9829 2016-9831 2017-9988 2017-11728 2017-11729"
+build_with_UBSAN "jasper-patron" \
+    "jasper-patron patron"

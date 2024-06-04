@@ -47,9 +47,9 @@ def check_any(buf, checklist):
 
 def check_jasper_template(buf):
     if "div-by-zero" in buf:
-        if "rdppm.c:434:" in buf:
+        if "jpc_dec.c:1197:" in buf:
             return True
-        if get_crash_func(buf) == "get_rgb_row":
+        if get_crash_func(buf) == "jpc_dec_process_siz":
             return True
     return False
 

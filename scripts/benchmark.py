@@ -3,11 +3,11 @@ from triage import *
 # (target bin, target cmdline, input src, additional option, triage function)
 
 FUZZ_TARGETS = [
-    ("swftophp-4.7-2016-9827", "-f @@", "file", check_jasper_template),
+    ("jasper-patron-tmp", "-f @@", "file", check_jasper_template),
 ]
 
 SLICE_TARGETS = {
-    'swftophp-4.7': {
+    'jasper-patron': {
         'frontend':'cil',
         'entry_point':'main',
         'bugs': ['2016-9827', '2016-9829', '2016-9831', '2017-9988', '2017-11728', '2017-11729']
