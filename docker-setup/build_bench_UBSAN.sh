@@ -29,5 +29,5 @@ function build_with_UBSAN() {
 export TOOL_NAME="UBSAN"
 # Build with ASAN only
 mkdir -p /benchmark/bin/UBSAN
-build_with_UBSAN "jasper-patron" \
-    "jasper-patron patron"
+build_with_UBSAN "jasper" \
+    "imginfo patron"

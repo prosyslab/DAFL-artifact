@@ -3,14 +3,14 @@ from triage import *
 # (target bin, target cmdline, input src, additional option, triage function)
 
 FUZZ_TARGETS = [
-    ("jasper-patron-tmp", "-f @@", "file", check_jasper_template),
+    ("imginfo-patron", "-f @@", "file", check_imginfo_template),
 ]
 
 SLICE_TARGETS = {
-    'jasper-patron': {
+    'imginfo': {
         'frontend':'cil',
         'entry_point':'main',
-        'bugs': ['2016-9827', '2016-9829', '2016-9831', '2017-9988', '2017-11728', '2017-11729']
+        'bugs': ['patron']
     }
 }
 

@@ -65,8 +65,6 @@ ENV ASAN_OPTIONS=allocator_may_return_null=1,detect_leaks=0
 # Build benchmark with AFL/AFLGo.
 COPY docker-setup/benchmark-project /benchmark/project
 COPY docker-setup/build_bench_common.sh /benchmark/build_bench_common.sh
-COPY docker-setup/build_bench_ASAN.sh /benchmark/build_bench_ASAN.sh
-RUN ./build_bench_ASAN.sh
 
 COPY docker-setup/build_bench_UBSAN.sh /benchmark/build_bench_UBSAN.sh
 RUN ./build_bench_UBSAN.sh
@@ -90,6 +88,9 @@ COPY scripts/benchmark.py /benchmark/scripts
 COPY scripts/common.py /benchmark/scripts
 COPY scripts/triage.py /benchmark/scripts
 COPY scripts/run_sparrow.py /benchmark/scripts
+
+COPY docker-setup/target/line /benchmark/target/line
+
 RUN python3 /benchmark/scripts/run_sparrow.py all thin
 RUN python3 /benchmark/scripts/run_sparrow.py all naive
 
@@ -102,10 +103,6 @@ RUN ./setup_DAFL.sh
 WORKDIR /benchmark
 COPY docker-setup/build_bench_DAFL.sh /benchmark/build_bench_DAFL.sh
 RUN ./build_bench_DAFL.sh
-
-# Build DAFL with no ASAN options to compare with Beacon
-# COPY docker-setup/build_bench_DAFL_noasan.sh /benchmark/build_bench_DAFL_noasan.sh
-# RUN ./build_bench_DAFL_noasan.sh
 
 # Build benchmarks with DAFL_select, DAFL_schedule, and DAFL_naive.
 COPY docker-setup/build_bench_DAFL_naive.sh /benchmark/build_bench_DAFL_naive.sh

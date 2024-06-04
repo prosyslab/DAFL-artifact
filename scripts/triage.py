@@ -45,7 +45,7 @@ def check_any(buf, checklist):
 
 
 
-def check_jasper_template(buf):
+def check_imginfo_template(buf):
     if "div-by-zero" in buf:
         if "jpc_dec.c:1197:" in buf:
             return True

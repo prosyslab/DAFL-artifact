@@ -35,5 +35,5 @@ function build_with_DAFL() {
 # Build with DAFL
 mkdir -p /benchmark/build_log
 mkdir -p /benchmark/bin/DAFL-naive
-build_with_DAFL "jasper-patron" \
-    "jasper-patron patron"
+build_with_DAFL "jasper" \
+    "imginfo patron"

@@ -8,17 +8,18 @@ export CXX="clang++"
 
 ### Program: libming-4.7
 cd /benchmark
-program="jasper-patron"
-binaries="swftophp"
+program="jasper"
+binaries="imginfo"
 build_target $program $CC $CXX " "
-cd /benchmark/RUNDIR-$program/jasper-patron
+cd /benchmark/RUNDIR-$program/jasper
 make clean
 yes | /smake/smake --init
 /smake/smake -j 1
 cd /benchmark/RUNDIR-$program
-for binary in $binaries; do
-    cp -r jasper-patron/sparrow/src/appl/.libs/imginfo/*.i /benchmark/smake-out/jasper-patron || exit 1
-done
+mkdir -p /benchmark/smake-out/imginfo
+
+find jasper/sparrow/src/libjasper/*/.libs -name "*.i" -exec cp {} /benchmark/smake-out/imginfo \;
+cp jasper/sparrow/src/appl/imginfo.o.i /benchmark/smake-out/imginfo
 
 
 rm -rf /benchmark/RUNDIR*
